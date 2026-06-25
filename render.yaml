@@ -1,0 +1,16 @@
+# Render Blueprint for XPALLA — deploy as a Node web service.
+# In Render: New → Blueprint → connect this repo → it reads this file.
+services:
+  - type: web
+    name: xpalla
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      # Demo runs on the built-in file database — no config required.
+      # To enable real AI later, add ANTHROPIC_API_KEY in the Render dashboard.
+      # To persist data across restarts, add SUPABASE_URL + SUPABASE_SERVICE_KEY.
+      - key: NODE_VERSION
+        value: "20"

@@ -1,0 +1,36 @@
+{
+  "users": [
+    {
+      "id": "u_8a76cb00b6cb611e",
+      "email": "diane@example.com",
+      "name": "Diane Marlowe",
+      "salt": "447cbce96fe6a185b913088d0544f492",
+      "pass": "34bf81d4a904ee134dd1214bad67e3027a59d1332fa669bd1f04557d3ad6ab548814deef26fc3433d85f93b93cdd0caada6ca2c8b300950622c2eae95109ba61",
+      "createdAt": "2026-06-07T22:47:38.987Z"
+    }
+  ],
+  "sessions": {},
+  "brands": {
+    "u_8a76cb00b6cb611e": {
+      "name": "Diane Marlowe",
+      "niche": "executive leadership coaching",
+      "years": "24",
+      "audience": "women re-entering the workforce after 45",
+      "outcome": "land senior roles authentically",
+      "voice": [
+        "Warm",
+        "Authoritative"
+      ],
+      "brief": "x",
+      "kit": {
+        "on": true,
+        "primary": "#145c5c",
+        "accent": "#B08D57",
+        "font": "Editorial",
+        "logo": null,
+        "handle": "@diane.marlowe"
+      }
+    }
+  },
+  "drafts": []
+}

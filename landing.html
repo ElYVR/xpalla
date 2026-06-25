@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>XPALLA — Build your personal brand before you need it</title>
+<meta name="description" content="XPALLA helps experienced women turn decades of expertise into a visible personal brand on LinkedIn & Instagram — so your next opportunity finds you before you need it." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --cream:#FAF6EF;--cream-2:#F2EBDF;--ink:#211E1A;--ink-soft:#4A453E;--muted:#8A8276;
+    --line:#E2D9C9;--plum:#6B3F5B;--plum-deep:#532E47;--gold:#B08D57;--gold-soft:#C9AE82;
+    --rose:#F0E4E9;--white:#FFFFFF;--shadow:0 24px 60px -32px rgba(43,28,46,.45);--shadow-sm:0 10px 30px -18px rgba(43,28,46,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--cream);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .serif{font-family:'Cormorant Garamond',Georgia,serif}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:999px;font-size:14.5px;font-weight:500;transition:.18s;cursor:pointer;border:none}
+  .btn-primary{background:var(--plum);color:#fff;box-shadow:var(--shadow-sm)}
+  .btn-primary:hover{background:var(--plum-deep);transform:translateY(-2px)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--plum);color:var(--plum)}
+  .eyebrow{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:600}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(250,246,239,.82);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .logo{font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:.3em;font-weight:600}
+  .nav-links{display:flex;align-items:center;gap:30px;font-size:14px;color:var(--ink-soft)}
+  .nav-links a:hover{color:var(--plum)}
+  .nav-links .btn{padding:10px 20px}
+  @media(max-width:720px){.nav-links a:not(.btn){display:none}}
+
+  /* hero */
+  .hero{padding:90px 0 70px;text-align:center;position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;top:-180px;left:50%;transform:translateX(-50%);width:760px;height:760px;border-radius:50%;background:radial-gradient(circle,var(--rose),transparent 62%);opacity:.7;z-index:0}
+  .hero .wrap{position:relative;z-index:1}
+  .hero h1{font-family:'Cormorant Garamond',serif;font-size:62px;line-height:1.04;font-weight:600;margin:20px auto 0;max-width:880px;letter-spacing:-.01em}
+  .hero h1 em{font-style:italic;color:var(--plum)}
+  .hero p.sub{font-size:18.5px;color:var(--ink-soft);max-width:620px;margin:24px auto 0;line-height:1.6}
+  .hero .cta{display:flex;gap:14px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+  .hero .note{font-size:12.5px;color:var(--muted);margin-top:16px}
+  @media(max-width:720px){.hero h1{font-size:42px}.hero{padding:56px 0 48px}}
+
+  /* mock window */
+  .mock{max-width:880px;margin:54px auto 0;border-radius:18px;border:1px solid var(--line);background:var(--white);box-shadow:var(--shadow);overflow:hidden}
+  .mock-bar{display:flex;align-items:center;gap:7px;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--cream-2)}
+  .mock-bar i{width:11px;height:11px;border-radius:50%;background:#d8cdb9;display:block}
+  .mock-body{display:grid;grid-template-columns:1fr 1.1fr;gap:0}
+  @media(max-width:680px){.mock-body{grid-template-columns:1fr}}
+  .mock-left{padding:26px;border-right:1px solid var(--line)}
+  .mock-right{padding:26px;background:linear-gradient(180deg,#fff,#fdfbf6)}
+  .ml-label{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .ml-pill{display:inline-block;font-size:11px;padding:5px 11px;border-radius:999px;background:var(--rose);color:var(--plum);margin:0 5px 6px 0}
+  .ml-card{background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:13px 15px;font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+  .ml-hook{border-left:3px solid var(--gold);font-weight:500;color:var(--ink)}
+  .ml-slide{background:linear-gradient(150deg,var(--plum-deep),var(--plum));color:#fff;border-radius:13px;padding:24px;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+  .ml-slide .k{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:9px}
+  .ml-slide .t{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1.15}
+
+  /* sections */
+  section{padding:80px 0}
+  .sec-head{text-align:center;max-width:680px;margin:0 auto 50px}
+  .sec-head h2{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;line-height:1.1;margin-top:12px}
+  .sec-head p{color:var(--ink-soft);font-size:16px;margin-top:14px}
+
+  .problem{background:var(--ink);color:var(--cream)}
+  .problem .sec-head h2{color:var(--cream)}
+  .problem .sec-head p{color:#c9c1b3}
+  .gaps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  @media(max-width:820px){.gaps{grid-template-columns:1fr}}
+  .gap{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:26px}
+  .gap .q{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:21px;color:#fff;line-height:1.3}
+  .gap p{color:#bdb4a6;font-size:14px;margin-top:10px}
+
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  @media(max-width:900px){.features{grid-template-columns:1fr 1fr}}
+  @media(max-width:600px){.features{grid-template-columns:1fr}}
+  .feat{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:var(--shadow-sm);transition:.2s}
+  .feat:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .feat .ic{width:48px;height:48px;border-radius:13px;background:var(--rose);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+  .feat h3{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600}
+  .feat p{color:var(--ink-soft);font-size:14px;margin-top:8px}
+
+  .who{background:linear-gradient(180deg,var(--cream),var(--cream-2))}
+  .who-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+  @media(max-width:820px){.who-grid{grid-template-columns:1fr}}
+  .who h2{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1.12}
+  .who ul{list-style:none;margin-top:22px;display:flex;flex-direction:column;gap:14px}
+  .who li{display:flex;gap:12px;font-size:15.5px;color:var(--ink-soft)}
+  .who li:before{content:"✦";color:var(--gold);flex-shrink:0}
+  .who-card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:34px;box-shadow:var(--shadow)}
+  .who-card .quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;line-height:1.4;color:var(--ink)}
+  .who-card .who-by{font-size:13px;color:var(--muted);margin-top:16px}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;counter-reset:s}
+  @media(max-width:820px){.steps{grid-template-columns:1fr}}
+  .step{position:relative;padding-top:14px}
+  .step .n{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:600;color:var(--gold-soft);line-height:1}
+  .step h3{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;margin-top:8px}
+  .step p{color:var(--ink-soft);font-size:14.5px;margin-top:8px}
+
+  .closer{text-align:center}
+  .closer-card{background:linear-gradient(135deg,var(--plum),var(--plum-deep));border-radius:26px;padding:64px 40px;color:#fff;box-shadow:var(--shadow)}
+  .closer-card h2{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;line-height:1.1;max-width:680px;margin:0 auto}
+  .closer-card h2 em{font-style:italic;color:var(--gold-soft)}
+  .closer-card p{color:#e7d9e2;margin:18px auto 0;max-width:520px;font-size:16px}
+  .closer-card .btn{margin-top:30px;background:#fff;color:var(--plum)}
+  .closer-card .btn:hover{background:var(--cream)}
+
+  footer{padding:46px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13px}
+  footer .logo{font-size:18px;color:var(--ink);margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <div class="logo">XPALLA</div>
+    <div class="nav-links">
+      <a href="#what">What it does</a>
+      <a href="#who">Who it's for</a>
+      <a href="#how">How it works</a>
+      <a class="btn btn-primary" href="/">Sign in</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Personal Brand Studio · for women with a track record</span>
+    <h1>Build your personal brand now, so your next opportunity <em>finds you before you need it.</em></h1>
+    <p class="sub">XPALLA turns your decades of expertise into a consistent, magnetic presence on LinkedIn &amp; Instagram — in your voice, engineered for how the algorithms actually work in 2026.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="/">Start building free →</a>
+      <a class="btn btn-ghost" href="#what">See how it works</a>
+    </div>
+    <p class="note">No credit card. Set up your brand in under five minutes.</p>
+
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i></div>
+      <div class="mock-body">
+        <div class="mock-left">
+          <div class="ml-label">Compose · LinkedIn carousel</div>
+          <div><span class="ml-pill">Contrarian hook</span><span class="ml-pill">Your voice</span><span class="ml-pill">Brand kit on</span></div>
+          <div class="ml-card ml-hook">"After 24 years, the advice I'd give my younger self…"</div>
+          <div class="ml-card">✦ Engineered for saves &amp; comments · ⏱ ~0:52 read</div>
+        </div>
+        <div class="mock-right">
+          <div class="ml-label">Branded preview</div>
+          <div class="ml-slide">
+            <div class="k">Cover</div>
+            <div class="t">5 leadership truths for women starting over after 45</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow" style="color:var(--gold-soft)">The gap</span>
+      <h2>You have the expertise. You're just not getting seen for it.</h2>
+      <p>The people with the deepest experience are often the quietest online — right when visibility matters most.</p>
+    </div>
+    <div class="gaps">
+      <div class="gap"><div class="q">"I don't know what to post."</div><p>The blank page, plus a feed full of hustle-culture advice written for people half your age.</p></div>
+      <div class="gap"><div class="q">"The algorithm keeps changing."</div><p>What worked last year doesn't now — and no one's translating it for experts, not influencers.</p></div>
+      <div class="gap"><div class="q">"I don't want to sound like everyone else."</div><p>You want to show up as yourself — generous and credible — not perform for strangers.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="what">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">What XPALLA does</span>
+      <h2>Your whole brand engine, in one calm studio</h2>
+      <p>Strategy, content, scheduling, and analytics — each tuned to the latest LinkedIn &amp; Instagram research, all in your authentic voice.</p>
+    </div>
+    <div class="features">
+      <div class="feat"><div class="ic">✦</div><h3>Brand Strategy</h3><p>A five-minute setup defines your niche, audience, and voice — then personalizes everything you create.</p></div>
+      <div class="feat"><div class="ic">✎</div><h3>Content Generator</h3><p>Posts, document carousels, Reels &amp; video scripts, polls — with A/B hook variants and a 48-hook proven library.</p></div>
+      <div class="feat"><div class="ic">🎨</div><h3>Brand Kit</h3><p>Your colors, font, logo &amp; handle applied to every output, so each post looks unmistakably yours.</p></div>
+      <div class="feat"><div class="ic">▦</div><h3>Content Calendar</h3><p>Save drafts and schedule them at the best posting time for each platform — no guesswork.</p></div>
+      <div class="feat"><div class="ic">◷</div><h3>Performance Analytics</h3><p>Track impressions, engagement, saves &amp; sends, and see which formats and hooks actually win.</p></div>
+      <div class="feat"><div class="ic">◈</div><h3>Profile Optimizer</h3><p>Sharpen your LinkedIn headline &amp; About and your Instagram bio so they work as hard as you do.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="who" class="who">
+  <div class="wrap who-grid">
+    <div>
+      <span class="eyebrow">Who it's for</span>
+      <h2>Built for women with a track record — not a follower count.</h2>
+      <ul>
+        <li>Coaches, consultants &amp; advisors ready to be known for their expertise</li>
+        <li>Professionals re-entering the workforce or stepping into leadership</li>
+        <li>Experts going independent who need clients to find them</li>
+        <li>Anyone in their second act who wants opportunity to come to them</li>
+      </ul>
+      <a class="btn btn-primary" href="/" style="margin-top:28px">Claim your studio →</a>
+    </div>
+    <div class="who-card">
+      <div class="quote">"Your experience isn't baggage. It's the whole reason someone should listen."</div>
+      <div class="who-by">— The idea XPALLA is built on</div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How it works</span>
+      <h2>From invisible to in-demand in three steps</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><h3>Define your brand</h3><p>Answer a few questions about your expertise, audience, and voice. XPALLA builds your brand brief.</p></div>
+      <div class="step"><div class="n">02</div><h3>Generate &amp; refine</h3><p>Create on-brand posts and carousels, pick your favorite hook, edit anything, and apply your brand kit.</p></div>
+      <div class="step"><div class="n">03</div><h3>Schedule &amp; grow</h3><p>Drop posts onto your calendar at the best times, then watch what's working in analytics.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="closer">
+  <div class="wrap">
+    <div class="closer-card">
+      <h2>The best time to build your brand was years ago. The second best time is <em>today.</em></h2>
+      <p>Don't wait until you need the next opportunity. Start now, and let it find you.</p>
+      <a class="btn" href="/">Start building free →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logo serif">XPALLA</div>
+    <div>Personal Brand Studio · Build your brand before you need it.</div>
+    <div style="margin-top:10px"><a href="/" style="color:var(--plum);border-bottom:1px solid var(--gold-soft)">Sign in</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
