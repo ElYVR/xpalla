@@ -28,6 +28,12 @@ create table if not exists xpalla_drafts (
   data       jsonb not null
 );
 
+create table if not exists xpalla_waitlist (
+  email      text primary key,
+  created_at timestamptz default now(),
+  data       jsonb not null
+);
+
 create index if not exists idx_drafts_user   on xpalla_drafts(user_id);
 create index if not exists idx_sessions_user on xpalla_sessions(user_id);
 
@@ -37,3 +43,4 @@ alter table xpalla_users    enable row level security;
 alter table xpalla_sessions enable row level security;
 alter table xpalla_brands   enable row level security;
 alter table xpalla_drafts   enable row level security;
+alter table xpalla_waitlist enable row level security;

@@ -112,6 +112,16 @@
   .closer-card p{color:#e7d9e2;margin:18px auto 0;max-width:520px;font-size:16px}
   .closer-card .btn{margin-top:30px;background:#fff;color:var(--plum)}
   .closer-card .btn:hover{background:var(--cream)}
+  .wl-form{display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+  .wl-form input{flex:1;min-width:240px;max-width:340px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:14px 20px;font-size:15px;color:#fff;font-family:inherit}
+  .wl-form input::placeholder{color:rgba(255,255,255,.6)}
+  .wl-form input:focus{outline:none;border-color:#fff;background:rgba(255,255,255,.18)}
+  .wl-form .btn{margin-top:0;background:#fff;color:var(--plum)}
+  .wl-form .btn:hover{background:var(--cream)}
+  .wl-form .btn:disabled{opacity:.6;cursor:default}
+  .wl-msg{margin-top:16px;font-size:14px;min-height:20px;color:#fff}
+  .wl-msg.err{color:#f6c9be}
+  .wl-msg.ok{color:#fff;font-weight:500}
 
   footer{padding:46px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13px}
   footer .logo{font-size:18px;color:var(--ink);margin-bottom:10px}
@@ -125,8 +135,8 @@
     <div class="nav-links">
       <a href="#what">What it does</a>
       <a href="#who">Who it's for</a>
-      <a href="#how">How it works</a>
-      <a class="btn btn-primary" href="/">Sign in</a>
+      <a href="/">Sign in</a>
+      <a class="btn btn-primary" href="#waitlist">Join waitlist</a>
     </div>
   </div>
 </nav>
@@ -137,10 +147,10 @@
     <h1>Build your personal brand now, so your next opportunity <em>finds you before you need it.</em></h1>
     <p class="sub">XPALLA turns your decades of expertise into a consistent, magnetic presence on LinkedIn &amp; Instagram — in your voice, engineered for how the algorithms actually work in 2026.</p>
     <div class="cta">
-      <a class="btn btn-primary" href="/">Start building free →</a>
+      <a class="btn btn-primary" href="#waitlist">Join the waitlist →</a>
       <a class="btn btn-ghost" href="#what">See how it works</a>
     </div>
-    <p class="note">No credit card. Set up your brand in under five minutes.</p>
+    <p class="note">Be first when XPALLA opens · founding-member perks · no spam.</p>
 
     <div class="mock">
       <div class="mock-bar"><i></i><i></i><i></i></div>
@@ -207,7 +217,7 @@
         <li>Experts going independent who need clients to find them</li>
         <li>Anyone in their second act who wants opportunity to come to them</li>
       </ul>
-      <a class="btn btn-primary" href="/" style="margin-top:28px">Claim your studio →</a>
+      <a class="btn btn-primary" href="#waitlist" style="margin-top:28px">Join the waitlist →</a>
     </div>
     <div class="who-card">
       <div class="quote">"Your experience isn't baggage. It's the whole reason someone should listen."</div>
@@ -230,12 +240,17 @@
   </div>
 </section>
 
-<section class="closer">
+<section class="closer" id="waitlist">
   <div class="wrap">
     <div class="closer-card">
+      <span class="eyebrow" style="color:var(--gold-soft)">Join the waitlist</span>
       <h2>The best time to build your brand was years ago. The second best time is <em>today.</em></h2>
-      <p>Don't wait until you need the next opportunity. Start now, and let it find you.</p>
-      <a class="btn" href="/">Start building free →</a>
+      <p>Be first when XPALLA opens — early access and founding-member perks. No spam, ever.</p>
+      <form class="wl-form" id="wlForm">
+        <input type="email" id="wlEmail" placeholder="you@example.com" aria-label="Your email" required />
+        <button class="btn" type="submit">Join the waitlist →</button>
+      </form>
+      <p class="wl-msg" id="wlMsg" role="status"></p>
     </div>
   </div>
 </section>
@@ -247,6 +262,37 @@
     <div style="margin-top:10px"><a href="/" style="color:var(--plum);border-bottom:1px solid var(--gold-soft)">Sign in</a></div>
   </div>
 </footer>
+
+<script>
+  (function(){
+    var f=document.getElementById('wlForm');
+    if(!f) return;
+    f.addEventListener('submit', async function(e){
+      e.preventDefault();
+      var email=document.getElementById('wlEmail').value.trim();
+      var msg=document.getElementById('wlMsg');
+      var btn=f.querySelector('button');
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg.className='wl-msg err'; msg.textContent='Please enter a valid email.'; return; }
+      var orig=btn.textContent; btn.disabled=true; btn.textContent='Joining…';
+      try{
+        var r=await fetch('/api/waitlist',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:email})});
+        var d=await r.json().catch(function(){return {};});
+        if(r.ok){
+          f.style.display='none';
+          msg.className='wl-msg ok';
+          msg.innerHTML="✦ You're on the list — we'll be in touch."+(d.count?(" <span style='opacity:.7;font-weight:400'>You're #"+d.count+".</span>"):"");
+        } else {
+          msg.className='wl-msg err';
+          msg.textContent=(d.error==='invalid_email'?'Please enter a valid email.':'Something went wrong — please try again.');
+          btn.disabled=false; btn.textContent=orig;
+        }
+      }catch(err){
+        msg.className='wl-msg err'; msg.textContent='Network error — please try again.';
+        btn.disabled=false; btn.textContent=orig;
+      }
+    });
+  })();
+</script>
 
 </body>
 </html>

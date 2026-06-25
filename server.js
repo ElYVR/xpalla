@@ -47,7 +47,7 @@ function makeJsonStore(){
   let db;
   try{ db=JSON.parse(fs.readFileSync(DBFILE,'utf8')); }
   catch(e){ try{ db=JSON.parse(fs.readFileSync(path.join(ROOT,'seed-db.json'),'utf8')); }catch(e2){ db={}; } }
-  db.users=db.users||[]; db.sessions=db.sessions||{}; db.brands=db.brands||{}; db.drafts=db.drafts||[];
+  db.users=db.users||[]; db.sessions=db.sessions||{}; db.brands=db.brands||{}; db.drafts=db.drafts||[]; db.waitlist=db.waitlist||[];
   const save=()=>{ try{ fs.writeFileSync(DBFILE, JSON.stringify(db,null,2)); }catch(e){} };
   return {
     kind:'json',
@@ -63,7 +63,8 @@ function makeJsonStore(){
     async addDraft(d){ db.drafts.unshift(d); save(); return d; },
     async getDraft(id,userId){ return db.drafts.find(x=>x.id===id&&x.userId===userId)||null; },
     async updateDraft(id,userId,patch){ const d=db.drafts.find(x=>x.id===id&&x.userId===userId); if(!d)return null; Object.assign(d,patch); save(); return d; },
-    async deleteDraft(id,userId){ db.drafts=db.drafts.filter(x=>!(x.id===id&&x.userId===userId)); save(); }
+    async deleteDraft(id,userId){ db.drafts=db.drafts.filter(x=>!(x.id===id&&x.userId===userId)); save(); },
+    async addToWaitlist(entry){ if(!db.waitlist.find(w=>w.email===entry.email)){ db.waitlist.push(entry); save(); } return {count:db.waitlist.length}; }
   };
 }
 
@@ -92,7 +93,8 @@ function makeSupabaseStore(){
     async addDraft(d){ await q('/xpalla_drafts',{method:'POST',headers:minimal,body:JSON.stringify({id:d.id,user_id:d.userId,created_at:d.createdAt,data:d})}); return d; },
     async getDraft(id,userId){ const a=await q('/xpalla_drafts?select=data&id=eq.'+enc(id)+'&user_id=eq.'+enc(userId)); return a&&a[0]?a[0].data:null; },
     async updateDraft(id,userId,patch){ const cur=await this.getDraft(id,userId); if(!cur)return null; const nd=Object.assign({},cur,patch); await q('/xpalla_drafts?id=eq.'+enc(id)+'&user_id=eq.'+enc(userId),{method:'PATCH',headers:minimal,body:JSON.stringify({data:nd})}); return nd; },
-    async deleteDraft(id,userId){ await q('/xpalla_drafts?id=eq.'+enc(id)+'&user_id=eq.'+enc(userId),{method:'DELETE',headers:minimal}); }
+    async deleteDraft(id,userId){ await q('/xpalla_drafts?id=eq.'+enc(id)+'&user_id=eq.'+enc(userId),{method:'DELETE',headers:minimal}); },
+    async addToWaitlist(entry){ await q('/xpalla_waitlist?on_conflict=email',{method:'POST',headers:Object.assign({},H,{Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify({email:entry.email,data:entry})}); const a=await q('/xpalla_waitlist?select=email'); return {count:(a||[]).length}; }
   };
 }
 
@@ -220,6 +222,14 @@ http.createServer(async (req,res)=>{
       await STORE.deleteDraft(url.split('/').pop(), u.id); return send(res,200,{ok:true});
     }
     // AI
+    // WAITLIST (public — no auth)
+    if(url==='/api/waitlist' && m==='POST'){
+      const {email,name}=await readBody(req);
+      const clean=(email||'').trim().toLowerCase();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) return send(res,400,{error:'invalid_email'});
+      const out=await STORE.addToWaitlist({email:clean,name:(name||'').trim(),createdAt:new Date().toISOString()});
+      return send(res,200,{ok:true,count:out&&out.count});
+    }
     if(url==='/api/status'){ return send(res,200,{mode:API_KEY?'claude':'demo',model:API_KEY?MODEL:null,db:STORE.kind}); }
     if(url==='/api/generate' && m==='POST'){
       if(!API_KEY) return send(res,503,{error:'no_key'});
