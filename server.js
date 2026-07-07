@@ -128,7 +128,7 @@ const RULES = {
 - Reels: hook in first 3s, 7-30s, vertical, burned-in captions. Original content only.`
 };
 function systemPrompt(platform, format){
-  return `You are XPALLA's content engine for Generation X women building a personal brand. Tone: warm, candid, authoritative; substance over hype; concrete and first-person.
+  return `You are XPALLA's content engine for experienced professionals building a personal brand. Tone: warm, candid, authoritative; substance over hype; concrete and first-person.
 
 ${RULES[platform]}
 

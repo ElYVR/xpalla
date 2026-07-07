@@ -57,7 +57,7 @@ const LI_BANK={
   ],
   "Call-out":[
     ['If you\'re rebuilding your career after 45 —','read this before your next move.'],
-    ['This is for the women who feel behind in {n}.','You\'re not. Here\'s why.'],
+    ['This is for anyone who feels behind in {n}.','You\'re not. Here\'s why.'],
     ['{aud}: this one\'s for you.','I wish someone had told me sooner.']
   ]
 };
@@ -67,7 +67,7 @@ const IG_BANK={
   "List tease":["5 {n} lessons it took me {y} years to learn","3 things I wish I knew about {n} sooner","The {n} checklist I wish I had at the start"],
   "Cliffhanger":["What if the simplest fix was the best one?","Nobody talks about what happens after {t}","The thing no one tells you about {t}"],
   "Result + time":["How I changed my {n} in 30 days","From stuck to sought-after — here's how","The 1 shift that changed everything in {n}"],
-  "Self-relevance":["If you're over 45 and starting over — this is for you","For the woman who feels behind: read this","{aud}, this is your sign"],
+  "Self-relevance":["If you're over 45 and starting over — this is for you","For anyone who feels behind: read this","{aud}, this is your sign"],
   "Transformation":["From invisible to in-demand — the exact path","I rebuilt my {n} from scratch at 50","Before & after: what {y} years really taught me"],
   "Authority":["The {n} move pros never talk about","{y} years in {n} taught me this one thing","The secret to {n} no one shares"]
 };
@@ -195,7 +195,7 @@ ${vw}. Write the way you'd speak to a respected peer over coffee — generous, s
         {kind:"content",title:"3. Confidence is quiet",body:"You don't need a trending audio. You need a clear point of view."},
         {kind:"content",title:"4. Ask better questions",body:"The shift isn't knowing more answers — it's seeing the real question sooner."},
         {kind:"content",title:"5. The right people find you",body:"When you sound like yourself, you attract people who want exactly that."},
-        {kind:"cta",title:"Save this.",body:"Then send it to a woman who's doubting her own experience.\n\nFollow for more on building a brand that fits who you already are."}
+        {kind:"cta",title:"Save this.",body:"Then send it to someone who's doubting their own experience.\n\nFollow for more on building a brand that fits who you already are."}
       ];
       return {
         ...vbase, platform:"LinkedIn", format, slides,
@@ -260,7 +260,7 @@ ${vw}. Write the way you'd speak to a respected peer over coffee — generous, s
     const vbase={hooks:variants,variantIndex:hi};
     const t=topic||"midlife reinvention";
     // keyword-rich caption first line for IG SEO; ≤5 hashtags (matches blotato cap)
-    const tags=["#"+n.replace(/[^a-z]/gi,""),"#midlifereinvention","#personalbranding","#genxwomen","#confidenceafter40"].slice(0,5);
+    const tags=["#"+n.replace(/[^a-z]/gi,""),"#midlifereinvention","#personalbranding","#genx","#confidenceafter40"].slice(0,5);
     const sendCTA=`Send this to a friend who needs the reminder today 💌`;
     const saveCTA=`Save this for the day you forget it 🤍`;
 
@@ -473,7 +473,7 @@ function Strategy({brand,setBrand,go}){
       {step===1 && (<div className="card pad fade">
         <div className="stepmeta"><span className="n">Step 2 of 4 — Audience</span></div>
         <div className="cardtitle">Who are you here for?</div><div className="divider"></div>
-        <div className="field"><label className="fl">Who do you most want to reach?</label><input className="tin" value={f.audience} onChange={e=>upd("audience",e.target.value)} placeholder="e.g. women re-entering the workforce after 45"/></div>
+        <div className="field"><label className="fl">Who do you most want to reach?</label><input className="tin" value={f.audience} onChange={e=>upd("audience",e.target.value)} placeholder="e.g. professionals re-entering the workforce after 45"/></div>
         <div className="field"><label className="fl">What outcome do you help them reach?</label><textarea className="tin" value={f.outcome} onChange={e=>upd("outcome",e.target.value)} placeholder="e.g. land senior roles without pretending to be someone they're not"/></div>
         <div style={{display:"flex",justifyContent:"space-between"}}><button className="btn btn-ghost" onClick={()=>setStep(0)}>← Back</button><button className="btn btn-primary" disabled={!f.audience} onClick={()=>setStep(2)}>Continue →</button></div>
       </div>)}
@@ -1155,7 +1155,7 @@ function Auth({onAuthed}){
         </div>
         <p className="tagline">Build your personal brand now, so your next opportunity finds you before you need it.</p>
         <div className="serif" style={{fontSize:27,fontWeight:600,textAlign:"center"}}>{mode==="signup"?"Create your studio":"Welcome back"}</div>
-        <p style={{textAlign:"center",color:"var(--muted)",fontSize:13.5,margin:"6px 0 22px"}}>{mode==="signup"?"For the woman ready to own her expertise online.":"Sign in to your brand studio."}</p>
+        <p style={{textAlign:"center",color:"var(--muted)",fontSize:13.5,margin:"6px 0 22px"}}>{mode==="signup"?"For anyone ready to own their expertise online.":"Sign in to your brand studio."}</p>
         <form onSubmit={submit}>
           {mode==="signup" && <div className="field"><label className="fl">Your name</label><input className="tin" value={name} onChange={e=>setName(e.target.value)} placeholder="Diane Marlowe"/></div>}
           <div className="field"><label className="fl">Email</label><input className="tin" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></div>

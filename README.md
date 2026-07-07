@@ -1,6 +1,6 @@
 # XPALLA — Personal Brand Studio
 
-A SaaS tool for Generation X women to build their personal brand on LinkedIn & Instagram.
+A SaaS tool for experienced professionals to build their personal brand on LinkedIn & Instagram.
 Accounts & login → brand strategy → algorithm-optimized content (A/B hooks, media, carousels)
 → a content calendar with best-time scheduling → performance analytics.
 

@@ -33,7 +33,7 @@ const LI_BANK = {
   "Mistake": [['The most expensive mistake of my career?', 'Trusting advice built for someone half my age.'], ['I wasted years on the wrong approach to {n}.', 'Here\'s what I\'d do differently now.'], ['The {n} mistake I watch smart people make daily —', 'and how to avoid it.']],
   "Listicle": [['7 things I wish I\'d known earlier about {n}.', 'Number 3 took me years to learn.'], ['5 {n} lessons from {y} years in the room.', 'The last one changed how I work.'], ['3 quiet truths about {n} nobody puts on a slide.', 'Starting with the one that stung.']],
   "Industry shift": [['{N} changed in 2026.', 'Most people are still doing it the old way.'], ['The way {n} works has quietly shifted.', 'Here\'s what still matters — and what doesn\'t.'], ['Everyone\'s chasing the new thing in {n}.', 'The fundamentals haven\'t moved an inch.']],
-  "Call-out": [['If you\'re rebuilding your career after 45 —', 'read this before your next move.'], ['This is for the women who feel behind in {n}.', 'You\'re not. Here\'s why.'], ['{aud}: this one\'s for you.', 'I wish someone had told me sooner.']]
+  "Call-out": [['If you\'re rebuilding your career after 45 —', 'read this before your next move.'], ['This is for anyone who feels behind in {n}.', 'You\'re not. Here\'s why.'], ['{aud}: this one\'s for you.', 'I wish someone had told me sooner.']]
 };
 const IG_BANK = {
   "Contrarian": ["Everything you've been told about {t} is wrong", "Unpopular truth about {n} after {y} years", "{N} advice is mostly noise — here's what's real"],
@@ -41,7 +41,7 @@ const IG_BANK = {
   "List tease": ["5 {n} lessons it took me {y} years to learn", "3 things I wish I knew about {n} sooner", "The {n} checklist I wish I had at the start"],
   "Cliffhanger": ["What if the simplest fix was the best one?", "Nobody talks about what happens after {t}", "The thing no one tells you about {t}"],
   "Result + time": ["How I changed my {n} in 30 days", "From stuck to sought-after — here's how", "The 1 shift that changed everything in {n}"],
-  "Self-relevance": ["If you're over 45 and starting over — this is for you", "For the woman who feels behind: read this", "{aud}, this is your sign"],
+  "Self-relevance": ["If you're over 45 and starting over — this is for you", "For anyone who feels behind: read this", "{aud}, this is your sign"],
   "Transformation": ["From invisible to in-demand — the exact path", "I rebuilt my {n} from scratch at 50", "Before & after: what {y} years really taught me"],
   "Authority": ["The {n} move pros never talk about", "{y} years in {n} taught me this one thing", "The secret to {n} no one shares"]
 };
@@ -245,7 +245,7 @@ ${vw}. Write the way you'd speak to a respected peer over coffee — generous, s
       }, {
         kind: "cta",
         title: "Save this.",
-        body: "Then send it to a woman who's doubting her own experience.\n\nFollow for more on building a brand that fits who you already are."
+        body: "Then send it to someone who's doubting their own experience.\n\nFollow for more on building a brand that fits who you already are."
       }];
       return {
         ...vbase,
@@ -346,7 +346,7 @@ ${vw}. Write the way you'd speak to a respected peer over coffee — generous, s
     };
     const t = topic || "midlife reinvention";
     // keyword-rich caption first line for IG SEO; ≤5 hashtags (matches blotato cap)
-    const tags = ["#" + n.replace(/[^a-z]/gi, ""), "#midlifereinvention", "#personalbranding", "#genxwomen", "#confidenceafter40"].slice(0, 5);
+    const tags = ["#" + n.replace(/[^a-z]/gi, ""), "#midlifereinvention", "#personalbranding", "#genx", "#confidenceafter40"].slice(0, 5);
     const sendCTA = `Send this to a friend who needs the reminder today 💌`;
     const saveCTA = `Save this for the day you forget it 🤍`;
     const igPlaybook = [`First caption line leads with the keyword "${t}" — Instagram search now indexes captions, and keyword-rich captions out-reach hashtag-stuffed ones.`, `Built around a SEND: sends/DM-shares are the #1 ranking signal in 2026, so the content is specific enough that one reader pictures one friend.`, `Explicit SAVE cue too — saves drive long-tail reach and authority.`, `≤5 relevant hashtags only (Mosseri confirmed hashtags barely affect reach now; keywords do the work).`];
@@ -881,7 +881,7 @@ function Strategy({
     className: "tin",
     value: f.audience,
     onChange: e => upd("audience", e.target.value),
-    placeholder: "e.g. women re-entering the workforce after 45"
+    placeholder: "e.g. professionals re-entering the workforce after 45"
   })), /*#__PURE__*/React.createElement("div", {
     className: "field"
   }, /*#__PURE__*/React.createElement("label", {
@@ -2447,7 +2447,7 @@ function Auth({
       fontSize: 13.5,
       margin: "6px 0 22px"
     }
-  }, mode === "signup" ? "For the woman ready to own her expertise online." : "Sign in to your brand studio."), /*#__PURE__*/React.createElement("form", {
+  }, mode === "signup" ? "For anyone ready to own their expertise online." : "Sign in to your brand studio."), /*#__PURE__*/React.createElement("form", {
     onSubmit: submit
   }, mode === "signup" && /*#__PURE__*/React.createElement("div", {
     className: "field"
