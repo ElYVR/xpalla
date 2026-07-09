@@ -637,12 +637,112 @@ function Output({
   }));
 }
 
+/* ====================== CONSISTENCY HELPERS ====================== */
+const WEEK_GOAL = 3;
+const dayKey = d => {
+  const x = new Date(d);
+  return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0");
+};
+const weekKeyOf = d => dayKey(startOfWeek(d));
+function draftDate(d) {
+  return d.scheduledFor || d.createdAt;
+}
+function consistencyStats(drafts) {
+  const weeks = new Set(drafts.map(d => weekKeyOf(new Date(draftDate(d)))));
+  const now = new Date();
+  const thisWeek = drafts.filter(d => weekKeyOf(new Date(draftDate(d))) === weekKeyOf(now)).length;
+  let streak = 0,
+    w = startOfWeek(now);
+  if (!weeks.has(weekKeyOf(w))) w = addDays(w, -7); // current week still in progress — grace
+  while (weeks.has(weekKeyOf(w))) {
+    streak++;
+    w = addDays(w, -7);
+  }
+  const scheduledAhead = drafts.filter(d => d.scheduledFor && new Date(d.scheduledFor) > now).length;
+  return {
+    streak,
+    thisWeek,
+    scheduledAhead
+  };
+}
+// next N upcoming Mon/Wed/Thu dates (LinkedIn's strongest days)
+function nextPostDays(n) {
+  const out = [];
+  let d = addDays(new Date(), 1);
+  while (out.length < n) {
+    const dow = d.getDay();
+    if (dow === 1 || dow === 3 || dow === 4) out.push(new Date(d));
+    d = addDays(d, 1);
+  }
+  return out;
+}
+
 /* ====================== DASHBOARD HOME ====================== */
 function Home({
   brand,
-  go
+  go,
+  active
 }) {
   const ready = !!brand;
+  const [drafts, setDrafts] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [planning, setPlanning] = useState(false);
+  useEffect(() => {
+    if (active !== false) API.drafts().then(d => {
+      setDrafts(d);
+      setLoaded(true);
+    });
+  }, [active]);
+  const stats = consistencyStats(drafts);
+  const coachDone = brand && brand.coach && brand.coach.date === dayKey(new Date()) ? (brand.coach.done || []).filter(Boolean).length : 0;
+  async function planWeek() {
+    if (!brand || planning) return;
+    setPlanning(true);
+    const niche = brand.niche || "your field";
+    const plan = [{
+      topic: `A lesson that took me years to learn in ${niche}`,
+      format: "Text post",
+      hookStyle: "Story"
+    }, {
+      topic: `A myth in ${niche} I want to correct`,
+      format: "Document carousel",
+      hookStyle: "Contrarian"
+    }, {
+      topic: `Behind the scenes of how I actually work`,
+      format: "Text post",
+      hookStyle: "Listicle"
+    }];
+    const days = nextPostDays(3);
+    const made = [];
+    for (let i = 0; i < plan.length; i++) {
+      const p = plan[i];
+      const r = await AI.linkedin(brand, p.topic, p.format, p.hookStyle, "Warm", 0, {
+        instant: i > 0
+      });
+      const {
+        title,
+        text
+      } = assembleDraft(r);
+      const hk = r.hooks && r.hooks[r.variantIndex || 0];
+      const dt = new Date(days[i]);
+      dt.setHours(9, 0, 0, 0);
+      const d = await API.addDraft({
+        platform: "LinkedIn",
+        format: r.format,
+        hookStyle: hk && hk.style || p.hookStyle,
+        title,
+        text,
+        hashtags: r.hashtags || [],
+        scheduledFor: dt.toISOString(),
+        status: "scheduled",
+        metrics: null
+      });
+      made.push(d);
+    }
+    setDrafts(ds => [...made, ...ds]);
+    setPlanning(false);
+    _setToast && _setToast("Week planned — 3 posts scheduled. Review them in the Calendar.");
+  }
   const mods = [{
     id: "strategy",
     ic: "✦",
@@ -654,6 +754,11 @@ function Home({
     t: "Content Generator",
     d: "Algorithm-optimized LinkedIn & Instagram content — posts, carousels, Reels."
   }, {
+    id: "coach",
+    ic: "❋",
+    t: "Daily Coach",
+    d: "15 minutes of relationship-building — comments, replies, one DM."
+  }, {
     id: "profile",
     ic: "◈",
     t: "Profile Optimizer",
@@ -664,27 +769,63 @@ function Home({
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid g3",
     style: {
-      marginBottom: 28
+      marginBottom: 20
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, ready ? "100%" : "0%"), /*#__PURE__*/React.createElement("div", {
+  }, stats.streak > 0 ? "🔥 " + stats.streak : "—"), /*#__PURE__*/React.createElement("div", {
     className: "l"
-  }, "Brand brief complete")), /*#__PURE__*/React.createElement("div", {
+  }, stats.streak === 1 ? "week streak" : "week streak" + (stats.streak ? "" : " — post once to start one"))), /*#__PURE__*/React.createElement("div", {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, "2"), /*#__PURE__*/React.createElement("div", {
+  }, stats.thisWeek, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20,
+      color: "var(--muted)"
+    }
+  }, " / ", WEEK_GOAL)), /*#__PURE__*/React.createElement("div", {
     className: "l"
-  }, "Platforms optimized")), /*#__PURE__*/React.createElement("div", {
+  }, "posts this week")), /*#__PURE__*/React.createElement("div", {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, "7"), /*#__PURE__*/React.createElement("div", {
+  }, coachDone, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20,
+      color: "var(--muted)"
+    }
+  }, " / 3")), /*#__PURE__*/React.createElement("div", {
     className: "l"
-  }, "Content formats ready"))), !ready && /*#__PURE__*/React.createElement("div", {
+  }, "coach actions today"))), ready && loaded && stats.thisWeek === 0 && stats.scheduledAhead > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "nudge soft"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", null, stats.scheduledAhead, " post", stats.scheduledAhead > 1 ? "s" : "", " queued ahead."), " Your next one goes out soon — check the Calendar to review it."), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-ghost",
+    onClick: () => go("calendar")
+  }, "Open calendar")), ready && loaded && stats.thisWeek === 0 && stats.scheduledAhead === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "nudge"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", null, "Nothing scheduled this week yet."), " One post keeps the streak alive — and your brand only compounds if you keep showing up."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    disabled: planning,
+    onClick: planWeek
+  }, planning ? /*#__PURE__*/React.createElement(Loading, null) : "⚡ Plan my week"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-ghost",
+    onClick: () => go("content")
+  }, "Write one post"))), ready && loaded && stats.thisWeek > 0 && stats.thisWeek < WEEK_GOAL && /*#__PURE__*/React.createElement("div", {
+    className: "nudge soft"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", null, stats.thisWeek, " of ", WEEK_GOAL, " posts"), " this week — nice momentum. Want XPALLA to plan the rest?"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-ghost",
+    disabled: planning,
+    onClick: planWeek
+  }, planning ? /*#__PURE__*/React.createElement(Loading, null) : "⚡ Fill my week")), !ready && /*#__PURE__*/React.createElement("div", {
     className: "card pad",
     style: {
       marginBottom: 28,
@@ -2505,6 +2646,148 @@ function Auth({
   }, mode === "signup" ? "Sign in" : "Create one"))));
 }
 
+/* ====================== DAILY ENGAGEMENT COACH ====================== */
+const COMMENT_STARTERS = [b => `This matches what I've seen in ${b.niche || "my field"} — especially [their point]. In my experience, the piece most people miss is [your insight].`, b => `Great framing. After ${b.years || "many"} years in ${b.niche || "this work"}, I'd add one thing: [your experience]. Have you seen that too?`, b => `[Their point] is the part worth sitting with. I watched this play out with [brief example] — the outcome surprised me.`, b => `Respectfully pushing back on one piece: [their point]. From what I've seen, [your counterpoint]. Curious how you think about that.`, b => `This is the kind of post I wish more people in ${b.niche || "our field"} wrote. The line about [their point] especially — here's why: [your take].`];
+const DM_OPENERS = [b => `Hi [name] — you crossed my mind when [what reminded you of them]. No agenda at all; just wanted to reconnect and hear what you're working on these days.`, b => `Hi [name] — I saw your post about [topic] and it stuck with me. We haven't spoken since [context]; would love to hear how things are going on your side.`, b => `Hi [name] — I'm spending more time sharing what I've learned in ${b.niche || "my field"}, and it made me think of the conversations we used to have. How have you been?`];
+function Coach({
+  brand,
+  setBrand,
+  go
+}) {
+  const today = dayKey(new Date());
+  const saved = brand && brand.coach && brand.coach.date === today ? brand.coach.done : [false, false, false];
+  const [done, setDone] = useState(saved);
+  const [ci, setCi] = useState(0),
+    [di, setDi] = useState(0);
+  if (!brand) return /*#__PURE__*/React.createElement(NeedBrand, {
+    go: go
+  });
+  function toggle(i) {
+    const nd = done.map((x, n) => n === i ? !x : x);
+    setDone(nd);
+    setBrand && setBrand({
+      ...brand,
+      coach: {
+        date: today,
+        done: nd
+      }
+    });
+  }
+  const allDone = done.every(Boolean);
+  const items = [{
+    t: "Comment on 3 posts from people in your niche",
+    d: "Thoughtful comments put you in front of *their* audience — the highest-leverage 10 minutes in personal branding. Add experience, never “Great post!”.",
+    extra: /*#__PURE__*/React.createElement("div", {
+      className: "coachdraft"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "sechead"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "seclabel"
+    }, "Comment starter — fill in the brackets"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "copybtn",
+      onClick: () => setCi((ci + 1) % COMMENT_STARTERS.length)
+    }, "↻ Another"), /*#__PURE__*/React.createElement("button", {
+      className: "copybtn",
+      onClick: () => copy(COMMENT_STARTERS[ci](brand))
+    }, "⧉ Copy"))), /*#__PURE__*/React.createElement("div", {
+      className: "secbody"
+    }, COMMENT_STARTERS[ci](brand)))
+  }, {
+    t: "Reply to every comment on your latest post",
+    d: "Each reply is a fresh engagement signal that extends your post's reach — and it tells commenters you're worth talking to."
+  }, {
+    t: "Send one no-agenda DM to reconnect",
+    d: "Opportunities arrive through people, not feeds. One warm reconnect a day = 250 rekindled relationships a year.",
+    extra: /*#__PURE__*/React.createElement("div", {
+      className: "coachdraft"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "sechead"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "seclabel"
+    }, "DM opener — fill in the brackets"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "copybtn",
+      onClick: () => setDi((di + 1) % DM_OPENERS.length)
+    }, "↻ Another"), /*#__PURE__*/React.createElement("button", {
+      className: "copybtn",
+      onClick: () => copy(DM_OPENERS[di](brand))
+    }, "⧉ Copy"))), /*#__PURE__*/React.createElement("div", {
+      className: "secbody"
+    }, DM_OPENERS[di](brand)))
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade",
+    style: {
+      maxWidth: 760
+    }
+  }, allDone ? /*#__PURE__*/React.createElement("div", {
+    className: "card pad",
+    style: {
+      marginBottom: 22,
+      background: "linear-gradient(110deg,#f4efe4,#fbf3ec)"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "eyebrow"
+  }, "Done for today"), /*#__PURE__*/React.createElement("div", {
+    className: "cardtitle"
+  }, "✓ That's the 15 minutes that compounds."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "var(--ink-soft)",
+      marginTop: 6
+    }
+  }, "Posts make you visible; conversations make you remembered. See you tomorrow.")) : /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "var(--ink-soft)",
+      fontSize: 14.5,
+      marginBottom: 22,
+      maxWidth: 640
+    }
+  }, "Fifteen minutes of relationship-building, once a day. This is the part most people skip — and the part that actually turns a brand into opportunities."), items.map((it, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "card pad coachitem" + (done[i] ? " isdone" : ""),
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 14,
+      alignItems: "flex-start"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "checkbig" + (done[i] ? " on" : ""),
+    onClick: () => toggle(i)
+  }, done[i] ? "✓" : ""), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Cormorant Garamond',serif",
+      fontSize: 21,
+      fontWeight: 600,
+      textDecoration: done[i] ? "line-through" : "none",
+      opacity: done[i] ? .55 : 1
+    }
+  }, it.t), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "var(--muted)",
+      fontSize: 13,
+      marginTop: 4
+    }
+  }, it.d), !done[i] && it.extra)))));
+}
+
 /* ====================== APP SHELL ====================== */
 const PAGES = {
   home: {
@@ -2526,6 +2809,11 @@ const PAGES = {
     crumb: "The Studio · Calendar",
     title: "Content Calendar",
     sub: "Save drafts and schedule them at the best time for each platform."
+  },
+  coach: {
+    crumb: "The Studio · Daily Coach",
+    title: "Daily Engagement Coach",
+    sub: "Fifteen minutes a day of relationship-building. Posts make you visible — conversations make you remembered."
   },
   analytics: {
     crumb: "The Studio · Analytics",
@@ -2606,6 +2894,10 @@ function App() {
     ic: "✎",
     t: "Content Generator"
   }, {
+    id: "coach",
+    ic: "❋",
+    t: "Daily Coach"
+  }, {
     id: "calendar",
     ic: "▦",
     t: "Content Calendar"
@@ -2683,7 +2975,8 @@ function App() {
     }
   }, /*#__PURE__*/React.createElement(Home, {
     brand: brand,
-    go: go
+    go: go,
+    active: page === "home"
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: page === "strategy" ? "block" : "none"
@@ -2700,7 +2993,11 @@ function App() {
     brand: brand,
     setBrand: persistBrand,
     go: go
-  })), page === "calendar" && /*#__PURE__*/React.createElement(Calendar, {
+  })), page === "coach" && /*#__PURE__*/React.createElement(Coach, {
+    brand: brand,
+    setBrand: persistBrand,
+    go: go
+  }), page === "calendar" && /*#__PURE__*/React.createElement(Calendar, {
     go: go
   }), page === "analytics" && /*#__PURE__*/React.createElement(Analytics, {
     go: go

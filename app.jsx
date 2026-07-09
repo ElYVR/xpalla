@@ -400,21 +400,100 @@ function Output({text}){
     <div className="output" dangerouslySetInnerHTML={{__html:fmtBold(text)}}/></div>);
 }
 
+/* ====================== CONSISTENCY HELPERS ====================== */
+const WEEK_GOAL=3;
+const dayKey=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");};
+const weekKeyOf=d=>dayKey(startOfWeek(d));
+function draftDate(d){return d.scheduledFor||d.createdAt;}
+function consistencyStats(drafts){
+  const weeks=new Set(drafts.map(d=>weekKeyOf(new Date(draftDate(d)))));
+  const now=new Date();
+  const thisWeek=drafts.filter(d=>weekKeyOf(new Date(draftDate(d)))===weekKeyOf(now)).length;
+  let streak=0, w=startOfWeek(now);
+  if(!weeks.has(weekKeyOf(w))) w=addDays(w,-7);           // current week still in progress — grace
+  while(weeks.has(weekKeyOf(w))){streak++;w=addDays(w,-7);}
+  const scheduledAhead=drafts.filter(d=>d.scheduledFor&&new Date(d.scheduledFor)>now).length;
+  return {streak,thisWeek,scheduledAhead};
+}
+// next N upcoming Mon/Wed/Thu dates (LinkedIn's strongest days)
+function nextPostDays(n){
+  const out=[];let d=addDays(new Date(),1);
+  while(out.length<n){const dow=d.getDay();if(dow===1||dow===3||dow===4)out.push(new Date(d));d=addDays(d,1);}
+  return out;
+}
+
 /* ====================== DASHBOARD HOME ====================== */
-function Home({brand,go}){
+function Home({brand,go,active}){
   const ready=!!brand;
+  const [drafts,setDrafts]=useState([]);
+  const [loaded,setLoaded]=useState(false);
+  const [planning,setPlanning]=useState(false);
+  useEffect(()=>{if(active!==false)API.drafts().then(d=>{setDrafts(d);setLoaded(true);});},[active]);
+  const stats=consistencyStats(drafts);
+  const coachDone=(brand&&brand.coach&&brand.coach.date===dayKey(new Date()))?(brand.coach.done||[]).filter(Boolean).length:0;
+
+  async function planWeek(){
+    if(!brand||planning)return;
+    setPlanning(true);
+    const niche=brand.niche||"your field";
+    const plan=[
+      {topic:`A lesson that took me years to learn in ${niche}`,format:"Text post",hookStyle:"Story"},
+      {topic:`A myth in ${niche} I want to correct`,format:"Document carousel",hookStyle:"Contrarian"},
+      {topic:`Behind the scenes of how I actually work`,format:"Text post",hookStyle:"Listicle"},
+    ];
+    const days=nextPostDays(3);
+    const made=[];
+    for(let i=0;i<plan.length;i++){
+      const p=plan[i];
+      const r=await AI.linkedin(brand,p.topic,p.format,p.hookStyle,"Warm",0,{instant:i>0});
+      const {title,text}=assembleDraft(r);
+      const hk=r.hooks&&r.hooks[r.variantIndex||0];
+      const dt=new Date(days[i]);dt.setHours(9,0,0,0);
+      const d=await API.addDraft({platform:"LinkedIn",format:r.format,hookStyle:(hk&&hk.style)||p.hookStyle,title,text,hashtags:r.hashtags||[],scheduledFor:dt.toISOString(),status:"scheduled",metrics:null});
+      made.push(d);
+    }
+    setDrafts(ds=>[...made,...ds]);
+    setPlanning(false);
+    _setToast&&_setToast("Week planned — 3 posts scheduled. Review them in the Calendar.");
+  }
+
   const mods=[
     {id:"strategy",ic:"✦",t:"Brand Strategy",d:"Define your niche, voice, and content pillars."},
     {id:"content",ic:"✎",t:"Content Generator",d:"Algorithm-optimized LinkedIn & Instagram content — posts, carousels, Reels."},
+    {id:"coach",ic:"❋",t:"Daily Coach",d:"15 minutes of relationship-building — comments, replies, one DM."},
     {id:"profile",ic:"◈",t:"Profile Optimizer",d:"Sharpen your headline, About, and bio."},
   ];
   return (
     <div className="fade">
-      <div className="grid g3" style={{marginBottom:28}}>
-        <div className="stat"><div className="k">{ready?"100%":"0%"}</div><div className="l">Brand brief complete</div></div>
-        <div className="stat"><div className="k">2</div><div className="l">Platforms optimized</div></div>
-        <div className="stat"><div className="k">7</div><div className="l">Content formats ready</div></div>
+      <div className="grid g3" style={{marginBottom:20}}>
+        <div className="stat"><div className="k">{stats.streak>0?"🔥 "+stats.streak:"—"}</div><div className="l">{stats.streak===1?"week streak":"week streak"+(stats.streak?"":" — post once to start one")}</div></div>
+        <div className="stat"><div className="k">{stats.thisWeek}<span style={{fontSize:20,color:"var(--muted)"}}> / {WEEK_GOAL}</span></div><div className="l">posts this week</div></div>
+        <div className="stat"><div className="k">{coachDone}<span style={{fontSize:20,color:"var(--muted)"}}> / 3</span></div><div className="l">coach actions today</div></div>
       </div>
+
+      {ready && loaded && stats.thisWeek===0 && stats.scheduledAhead>0 && (
+        <div className="nudge soft">
+          <div><strong>{stats.scheduledAhead} post{stats.scheduledAhead>1?"s":""} queued ahead.</strong> Your next one goes out soon — check the Calendar to review it.</div>
+          <button className="btn btn-ghost" onClick={()=>go("calendar")}>Open calendar</button>
+        </div>
+      )}
+      {ready && loaded && stats.thisWeek===0 && stats.scheduledAhead===0 && (
+        <div className="nudge">
+          <div>
+            <strong>Nothing scheduled this week yet.</strong> One post keeps the streak alive — and your brand only compounds if you keep showing up.
+          </div>
+          <div style={{display:"flex",gap:10,flexShrink:0}}>
+            <button className="btn btn-primary" disabled={planning} onClick={planWeek}>{planning?<Loading/>:"⚡ Plan my week"}</button>
+            <button className="btn btn-ghost" onClick={()=>go("content")}>Write one post</button>
+          </div>
+        </div>
+      )}
+      {ready && loaded && stats.thisWeek>0 && stats.thisWeek<WEEK_GOAL && (
+        <div className="nudge soft">
+          <div><strong>{stats.thisWeek} of {WEEK_GOAL} posts</strong> this week — nice momentum. Want XPALLA to plan the rest?</div>
+          <button className="btn btn-ghost" disabled={planning} onClick={planWeek}>{planning?<Loading/>:"⚡ Fill my week"}</button>
+        </div>
+      )}
       {!ready && (
         <div className="card pad" style={{marginBottom:28,background:"linear-gradient(110deg,#fff,#fbf3ec)"}}>
           <span className="eyebrow">Start here</span>
@@ -1172,12 +1251,72 @@ function Auth({onAuthed}){
   );
 }
 
+/* ====================== DAILY ENGAGEMENT COACH ====================== */
+const COMMENT_STARTERS=[
+  b=>`This matches what I've seen in ${b.niche||"my field"} — especially [their point]. In my experience, the piece most people miss is [your insight].`,
+  b=>`Great framing. After ${b.years||"many"} years in ${b.niche||"this work"}, I'd add one thing: [your experience]. Have you seen that too?`,
+  b=>`[Their point] is the part worth sitting with. I watched this play out with [brief example] — the outcome surprised me.`,
+  b=>`Respectfully pushing back on one piece: [their point]. From what I've seen, [your counterpoint]. Curious how you think about that.`,
+  b=>`This is the kind of post I wish more people in ${b.niche||"our field"} wrote. The line about [their point] especially — here's why: [your take].`,
+];
+const DM_OPENERS=[
+  b=>`Hi [name] — you crossed my mind when [what reminded you of them]. No agenda at all; just wanted to reconnect and hear what you're working on these days.`,
+  b=>`Hi [name] — I saw your post about [topic] and it stuck with me. We haven't spoken since [context]; would love to hear how things are going on your side.`,
+  b=>`Hi [name] — I'm spending more time sharing what I've learned in ${b.niche||"my field"}, and it made me think of the conversations we used to have. How have you been?`,
+];
+function Coach({brand,setBrand,go}){
+  const today=dayKey(new Date());
+  const saved=(brand&&brand.coach&&brand.coach.date===today)?brand.coach.done:[false,false,false];
+  const [done,setDone]=useState(saved);
+  const [ci,setCi]=useState(0),[di,setDi]=useState(0);
+  if(!brand) return <NeedBrand go={go}/>;
+  function toggle(i){
+    const nd=done.map((x,n)=>n===i?!x:x);
+    setDone(nd);
+    setBrand&&setBrand({...brand,coach:{date:today,done:nd}});
+  }
+  const allDone=done.every(Boolean);
+  const items=[
+    {t:"Comment on 3 posts from people in your niche",d:"Thoughtful comments put you in front of *their* audience — the highest-leverage 10 minutes in personal branding. Add experience, never “Great post!”.",
+      extra:(<div className="coachdraft"><div className="sechead"><span className="seclabel">Comment starter — fill in the brackets</span><div style={{display:"flex",gap:6}}><button className="copybtn" onClick={()=>setCi((ci+1)%COMMENT_STARTERS.length)}>↻ Another</button><button className="copybtn" onClick={()=>copy(COMMENT_STARTERS[ci](brand))}>⧉ Copy</button></div></div><div className="secbody">{COMMENT_STARTERS[ci](brand)}</div></div>)},
+    {t:"Reply to every comment on your latest post",d:"Each reply is a fresh engagement signal that extends your post's reach — and it tells commenters you're worth talking to."},
+    {t:"Send one no-agenda DM to reconnect",d:"Opportunities arrive through people, not feeds. One warm reconnect a day = 250 rekindled relationships a year.",
+      extra:(<div className="coachdraft"><div className="sechead"><span className="seclabel">DM opener — fill in the brackets</span><div style={{display:"flex",gap:6}}><button className="copybtn" onClick={()=>setDi((di+1)%DM_OPENERS.length)}>↻ Another</button><button className="copybtn" onClick={()=>copy(DM_OPENERS[di](brand))}>⧉ Copy</button></div></div><div className="secbody">{DM_OPENERS[di](brand)}</div></div>)},
+  ];
+  return (
+    <div className="fade" style={{maxWidth:760}}>
+      {allDone ? (
+        <div className="card pad" style={{marginBottom:22,background:"linear-gradient(110deg,#f4efe4,#fbf3ec)"}}>
+          <span className="eyebrow">Done for today</span>
+          <div className="cardtitle">✓ That's the 15 minutes that compounds.</div>
+          <p style={{color:"var(--ink-soft)",marginTop:6}}>Posts make you visible; conversations make you remembered. See you tomorrow.</p>
+        </div>
+      ) : (
+        <p style={{color:"var(--ink-soft)",fontSize:14.5,marginBottom:22,maxWidth:640}}>Fifteen minutes of relationship-building, once a day. This is the part most people skip — and the part that actually turns a brand into opportunities.</p>
+      )}
+      {items.map((it,i)=>(
+        <div key={i} className={"card pad coachitem"+(done[i]?" isdone":"")} style={{marginBottom:16}}>
+          <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
+            <button className={"checkbig"+(done[i]?" on":"")} onClick={()=>toggle(i)}>{done[i]?"✓":""}</button>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,textDecoration:done[i]?"line-through":"none",opacity:done[i]?.55:1}}>{it.t}</div>
+              <p style={{color:"var(--muted)",fontSize:13,marginTop:4}}>{it.d}</p>
+              {!done[i] && it.extra}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ====================== APP SHELL ====================== */
 const PAGES={
   home:{crumb:"Dashboard",title:"Welcome to your studio",sub:"Build, write, and refine your personal brand — one calm, expert step at a time."},
   strategy:{crumb:"The Studio · Strategy",title:"Brand Strategy",sub:"Define the foundation. Four minutes now saves you a hundred second-guesses later."},
   content:{crumb:"The Studio · Content",title:"Content Generator",sub:"Posts, carousels, and Reels engineered on the latest LinkedIn & Instagram algorithms — in your voice. Upload media and build carousels right here."},
   calendar:{crumb:"The Studio · Calendar",title:"Content Calendar",sub:"Save drafts and schedule them at the best time for each platform."},
+  coach:{crumb:"The Studio · Daily Coach",title:"Daily Engagement Coach",sub:"Fifteen minutes a day of relationship-building. Posts make you visible — conversations make you remembered."},
   analytics:{crumb:"The Studio · Analytics",title:"Performance Analytics",sub:"See what's working — impressions, engagement rate, saves and sends, and which formats and hook styles win. Track real numbers or load sample data."},
   profile:{crumb:"The Studio · Profile",title:"Profile Optimizer",sub:"Make your headline, About, and bio work as hard as you do."},
 };
@@ -1204,7 +1343,7 @@ function App(){
   if(!user) return <Auth onAuthed={(d)=>{setUser(d.user);setBrand(d.brand||null);setPage(d.brand?"home":"strategy");}}/>;
 
   const meta=PAGES[page];
-  const nav=[{id:"home",ic:"❖",t:"Dashboard"},{id:"strategy",ic:"✦",t:"Brand Strategy"},{id:"content",ic:"✎",t:"Content Generator"},{id:"calendar",ic:"▦",t:"Content Calendar"},{id:"analytics",ic:"◷",t:"Analytics"},{id:"profile",ic:"◈",t:"Profile Optimizer"}];
+  const nav=[{id:"home",ic:"❖",t:"Dashboard"},{id:"strategy",ic:"✦",t:"Brand Strategy"},{id:"content",ic:"✎",t:"Content Generator"},{id:"coach",ic:"❋",t:"Daily Coach"},{id:"calendar",ic:"▦",t:"Content Calendar"},{id:"analytics",ic:"◷",t:"Analytics"},{id:"profile",ic:"◈",t:"Profile Optimizer"}];
   const dispName=(brand&&brand.name)||user.name||user.email;
   const initials=(dispName?dispName.trim()[0]:"M").toUpperCase();
   return (
@@ -1226,9 +1365,10 @@ function App(){
       <main className="main">
         <div className="topbar"><div><div className="crumb">{meta.crumb}</div><h1>{meta.title}</h1><p className="sub">{meta.sub}</p></div></div>
         <div className="content">
-          <div style={{display:page==="home"?"block":"none"}}><Home brand={brand} go={go}/></div>
+          <div style={{display:page==="home"?"block":"none"}}><Home brand={brand} go={go} active={page==="home"}/></div>
           <div style={{display:page==="strategy"?"block":"none"}}><Strategy brand={brand} setBrand={persistBrand} go={go}/></div>
           <div style={{display:page==="content"?"block":"none"}}><Content brand={brand} setBrand={persistBrand} go={go}/></div>
+          {page==="coach" && <Coach brand={brand} setBrand={persistBrand} go={go}/>}
           {page==="calendar" && <Calendar go={go}/>}
           {page==="analytics" && <Analytics go={go}/>}
           <div style={{display:page==="profile"?"block":"none"}}><Profile brand={brand} go={go}/></div>
