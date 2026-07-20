@@ -1,3 +1,5 @@
 .env
 xpalla-db.json
 node_modules/
+leadgen/.env
+leadgen/leadgen-db.json

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Work with El — Superpowers With AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#FAF7F2;--ink:#1C1D28;--ink-soft:#454654;--muted:#8A8894;--line:#E3DED2;
+        --spark:#E85D3D;--spark-deep:#C74628;--navy:#1E2233;--mist:#FBEAE4;
+        --shadow:0 18px 50px -28px rgba(30,34,51,.45)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+  .wrap{max-width:640px;margin:0 auto;padding:56px 24px 60px;flex:1;width:100%}
+  .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em;color:var(--navy)}
+  .brand em{font-style:normal;color:var(--spark)}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,6vw,42px);font-weight:700;line-height:1.1;margin:26px 0 14px}
+  h1 em{font-style:normal;color:var(--spark)}
+  .lede{font-size:16.5px;color:var(--ink-soft);max-width:520px;margin-bottom:34px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:30px 30px}
+  label{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 7px}
+  .field{margin-bottom:18px}
+  input,textarea{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:13px 15px;font-size:15px;font-family:inherit;color:var(--ink);transition:.16s;resize:vertical}
+  input:focus,textarea:focus{outline:none;border-color:var(--spark);background:#fff;box-shadow:0 0 0 3px var(--mist)}
+  textarea{min-height:96px}
+  button{width:100%;background:var(--spark);color:#fff;border:none;border-radius:999px;padding:15px 22px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:.18s}
+  button:hover{background:var(--spark-deep);transform:translateY(-1px)}
+  button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .err{background:#fbe9e4;border:1px solid #ecc4b8;color:#a8452e;font-size:13px;border-radius:9px;padding:10px 13px;margin-bottom:14px;display:none}
+  .fine{font-size:12px;color:var(--muted);margin-top:12px;text-align:center}
+  .thanks{display:none;text-align:center}
+  .thanks .big{font-size:44px;color:var(--spark);font-family:'Space Grotesk',sans-serif}
+  .thanks h2{font-family:'Space Grotesk',sans-serif;font-size:24px;margin:8px 0 10px}
+  .thanks p{color:var(--ink-soft);font-size:15px;margin-bottom:20px}
+  .bookbtn{display:inline-block;background:var(--navy);color:#fff;text-decoration:none;border-radius:999px;padding:14px 28px;font-weight:600;font-size:15px;transition:.18s;width:auto}
+  .bookbtn:hover{background:#141724;transform:translateY(-1px)}
+  .calembed{margin-top:8px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  footer{text-align:center;font-size:12px;color:var(--muted);padding:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">SUPERPOWERS <em>WITH AI</em></div>
+  <h1>Ready to make AI your <em>superpower</em>?</h1>
+  <p class="lede">I help small business owners, coaches, and consultants put AI to work — hands-on training and coaching, no jargon, real time saved. Tell me a little about you and I'll be in touch.</p>
+
+  <div class="card">
+    <form id="capForm">
+      <div class="err" id="capErr"></div>
+      <div class="field"><label for="capName">Your name</label><input id="capName" autocomplete="name" placeholder="Jane Doe" /></div>
+      <div class="field"><label for="capEmail">Email</label><input id="capEmail" type="email" autocomplete="email" placeholder="you@yourbusiness.com" /></div>
+      <div class="field"><label for="capNeed">What would you love AI to take off your plate?</label><textarea id="capNeed" placeholder="e.g. I run a design studio and drown in client emails and proposals…"></textarea></div>
+      <button id="capBtn" type="submit">Let's talk →</button>
+      <div class="fine">No spam, no newsletter auto-add — this goes straight to El.</div>
+    </form>
+
+    <div class="thanks" id="capThanks">
+      <div class="big">✓</div>
+      <h2>Got it — thank you!</h2>
+      <p id="thanksCopy">I'll get back to you personally within a day.</p>
+      <div id="bookWrap"></div>
+    </div>
+  </div>
+</div>
+<footer>Superpowers With AI · El Wong</footer>
+
+<script>
+(function(){
+  var form=document.getElementById('capForm'), errBox=document.getElementById('capErr'),
+      btn=document.getElementById('capBtn'), thanks=document.getElementById('capThanks');
+  function showErr(msg){ errBox.textContent=msg; errBox.style.display='block'; }
+  form.addEventListener('submit', function(e){
+    e.preventDefault(); errBox.style.display='none';
+    var name=document.getElementById('capName').value.trim(),
+        email=document.getElementById('capEmail').value.trim(),
+        need=document.getElementById('capNeed').value.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr('Please enter a valid email address.');
+    btn.disabled=true; btn.textContent='Sending…';
+    fetch('/api/capture',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({name:name,email:email,need:need})
+    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+      .then(function(res){
+        if(!res.ok){
+          btn.disabled=false; btn.textContent="Let's talk →";
+          return showErr(res.d.error==='invalid_email'?'Please enter a valid email address.':'Something went wrong — please try again.');
+        }
+        form.style.display='none'; thanks.style.display='block';
+        var cal=res.d.calendlyUrl;
+        if(cal){
+          document.getElementById('thanksCopy').textContent='Want to skip the back-and-forth? Grab a time that works for you:';
+          var wrap=document.getElementById('bookWrap');
+          // Calendly inline embed (one external script). Falls back to a plain
+          // button link if the embed script is blocked or slow.
+          var link=document.createElement('a');
+          link.className='bookbtn'; link.href=cal; link.target='_blank'; link.rel='noreferrer';
+          link.textContent='Book a call →';
+          wrap.appendChild(link);
+          var div=document.createElement('div');
+          div.className='calendly-inline-widget calembed';
+          div.setAttribute('data-url', cal);
+          div.style.minWidth='300px'; div.style.height='640px';
+          wrap.appendChild(div);
+          var s=document.createElement('script');
+          s.src='https://assets.calendly.com/assets/external/widget.js'; s.async=true;
+          document.body.appendChild(s);
+        }
+      })
+      .catch(function(){
+        btn.disabled=false; btn.textContent="Let's talk →";
+        showErr('Network error — please try again.');
+      });
+  });
+})();
+</script>
+</body>
+</html>

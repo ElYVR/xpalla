@@ -14,3 +14,18 @@ services:
       # To persist data across restarts, add SUPABASE_URL + SUPABASE_SERVICE_KEY.
       - key: NODE_VERSION
         value: "20"
+  - type: web
+    name: leadgen
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node leadgen/server.js
+    autoDeploy: true
+    envVars:
+      # Runs in demo mode with no config. In the Render dashboard add:
+      #   LEADGEN_PASSWORD           (recommended — pre-seeds the login password)
+      #   SUPABASE_URL + SUPABASE_SERVICE_KEY  (persist data; free-tier disk is ephemeral)
+      #   ANTHROPIC_API_KEY          (real AI scoring + outreach drafting)
+      #   RESEND_API_KEY             (email alerts for new captured leads)
+      - key: NODE_VERSION
+        value: "20"

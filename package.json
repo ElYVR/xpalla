@@ -5,7 +5,8 @@
   "description": "XPALLA — Personal Brand Studio for Generation X women",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:leadgen": "node leadgen/server.js"
   },
   "engines": {
     "node": ">=18"
